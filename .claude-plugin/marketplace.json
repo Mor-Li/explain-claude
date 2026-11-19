@@ -1,0 +1,13 @@
+{
+  "name": "explain-claude",
+  "description": "explain-claude：让 Gemini 用大白话重讲 Claude Code 每轮长回复的插件",
+  "owner": {
+    "name": "Mor-Li"
+  },
+  "plugins": [
+    {
+      "name": "explain-claude",
+      "source": "./"
+    }
+  ]
+}

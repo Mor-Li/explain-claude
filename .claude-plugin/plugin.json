@@ -1,0 +1,42 @@
+{
+  "name": "explain-claude",
+  "version": "0.1.0",
+  "description": "Claude 干完一轮长活后，把整轮轨迹交给 Gemini 用大白话重讲一遍，原地替换屏幕上的回复（存档不变）",
+  "author": {
+    "name": "Mor-Li"
+  },
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "base_url": {
+      "type": "string",
+      "title": "接口地址",
+      "description": "OpenAI 兼容接口的地址，不带 /chat/completions。默认是 Google Gemini 官方接口",
+      "default": "https://generativelanguage.googleapis.com/v1beta/openai"
+    },
+    "model": {
+      "type": "string",
+      "title": "模型名",
+      "description": "接口上可用的模型名",
+      "default": "gemini-3.1-pro-preview"
+    },
+    "api_key_env": {
+      "type": "string",
+      "title": "密钥所在的环境变量名",
+      "description": "填环境变量的名字，不是密钥本身。插件从这个变量里读密钥",
+      "default": "GEMINI_API_KEY"
+    },
+    "min_chars": {
+      "type": "number",
+      "title": "最少字数",
+      "description": "Claude 最后那段回复不到这么多字（不算空白）就不解读",
+      "default": 400
+    },
+    "min_tool_calls": {
+      "type": "number",
+      "title": "最少工具调用次数",
+      "description": "这一轮工具调用不到这么多次就不解读，闲聊的轮次因此会跳过",
+      "default": 6
+    }
+  }
+}
