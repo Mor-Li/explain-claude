@@ -6,12 +6,15 @@
     EXPLAIN_CLAUDE_API_KEY_ENV    密钥放在哪个环境变量里，默认 GEMINI_API_KEY
     EXPLAIN_CLAUDE_API_KEY        也可以直接给密钥，优先用它
     EXPLAIN_CLAUDE_MIN_TOOL_CALLS 一轮至少调多少次工具才解读
+    EXPLAIN_CLAUDE_HISTORY_DIR    存档放哪，默认 ~/.config/explain-claude/history
 prompt 读仓库根目录的 prompt.md。同一位置有 prompt.local.md 就优先用它，
 这个文件不进 git，放你自己的版本。
 
 mod 每轮结束时调用它：
     python3 explain_turn.py <transcript.jsonl>
 输出一行 JSON：{"original": 这一轮最后一段回复原文, "explained": Gemini 的解读}
+每次解读成功都存一份档：一个 JSON 文件，里面有发给模型的全文、Claude 原文和解读。只增不删。
+下面几种试跑命令都不存档。
 
 单独试跑（只打印，不影响任何东西）：
     python3 explain_turn.py <transcript.jsonl> --print            # 解读最近一轮
@@ -47,6 +50,9 @@ MODEL = os.environ.get("EXPLAIN_CLAUDE_MODEL", "gemini-4-argon")
 CLIP = 2000  # 每个工具输入或返回最多留多少字，太长的截断
 # 这一轮工具调用不到这么多次就不解读（纯聊天的轮次一次都没有）
 MIN_TOOL_CALLS = int(os.environ.get("EXPLAIN_CLAUDE_MIN_TOOL_CALLS", "6"))
+HISTORY_DIR = os.path.expanduser(
+    os.environ.get("EXPLAIN_CLAUDE_HISTORY_DIR", "~/.config/explain-claude/history")
+)
 # 这些是 Claude 给 app 更新任务列表、写收尾小结用的，闲聊时也会调，不算真干活
 BOOKKEEPING_TOOLS = ("mcp__ccd_turn__",)
 
@@ -159,6 +165,27 @@ def ask_model(prompt):
             time.sleep(2 ** attempt * 3)
 
 
+def save_history(transcript, prompt, original, explained):
+    """存一份档。文件名开头是时间，后面跟会话编号的前 8 位，按名字排序就是时间顺序。"""
+    session = os.path.splitext(os.path.basename(transcript))[0]
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    os.makedirs(HISTORY_DIR, exist_ok=True)
+    path = os.path.join(HISTORY_DIR, f"{stamp}-{session[:8]}.json")
+    record = {
+        "time": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "session": session,
+        "transcript": transcript,
+        "cwd": os.getcwd(),
+        "base_url": BASE_URL,
+        "model": MODEL,
+        "prompt": prompt,
+        "original": original,
+        "explained": explained,
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(record, f, ensure_ascii=False, indent=2)
+
+
 def main():
     if "--sample" in sys.argv:
         with open(sys.argv[sys.argv.index("--sample") + 1], encoding="utf-8") as f:
@@ -184,10 +211,15 @@ def main():
     if "--show" in sys.argv:
         print(load_prompt().replace("{trajectory}", trajectory))
         return
-    explained = ask_model(load_prompt().replace("{trajectory}", trajectory))
+    prompt = load_prompt().replace("{trajectory}", trajectory)
+    explained = ask_model(prompt)
     if "--print" in sys.argv:
         print(explained)
     else:
+        try:
+            save_history(sys.argv[1], prompt, final_text, explained)
+        except OSError as err:  # 存档失败不耽误替换显示
+            print(f"存档失败：{err}", file=sys.stderr)
         print(json.dumps({"original": final_text, "explained": explained}, ensure_ascii=False))
 
 
