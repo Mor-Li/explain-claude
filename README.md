@@ -16,7 +16,7 @@ After a long turn, Claude Code's report is often long and hard to follow. This p
 
 Only the display changes. The saved transcript and the context Claude itself reads stay as they were.
 
-Every retelling is archived as one JSON file in `~/.config/explain-claude/history/`: the full prompt sent to the model (with the trajectory), Claude's original reply, the retelling, the model and the time. Files are never deleted. Set `EXPLAIN_CLAUDE_HISTORY_DIR` to store them elsewhere. The test commands below don't archive anything. Type `/gemini` to switch between the retelling and the original.
+Every retelling is archived as one JSON file in the plugin's own `history/` folder: the full prompt sent to the model (with the trajectory), Claude's original reply, the retelling, the model and the time. Files are never deleted. `history/` is in `.gitignore`, so your conversations never get committed. Set `EXPLAIN_CLAUDE_HISTORY_DIR` to store them elsewhere, for example if you installed from GitHub and want the archive to survive plugin updates. The test commands below don't archive anything. Type `/gemini` to switch between the retelling and the original.
 
 Until the model answers, Claude's original reply stays on screen. If the call fails (timeout, rate limit, wrong key), you get a short "Gemini 解读失败" notice and the original stays. The conversation goes on as usual.
 

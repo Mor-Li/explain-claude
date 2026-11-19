@@ -6,7 +6,7 @@
     EXPLAIN_CLAUDE_API_KEY_ENV    密钥放在哪个环境变量里，默认 GEMINI_API_KEY
     EXPLAIN_CLAUDE_API_KEY        也可以直接给密钥，优先用它
     EXPLAIN_CLAUDE_MIN_TOOL_CALLS 一轮至少调多少次工具才解读
-    EXPLAIN_CLAUDE_HISTORY_DIR    存档放哪，默认 ~/.config/explain-claude/history
+    EXPLAIN_CLAUDE_HISTORY_DIR    存档放哪，默认仓库里的 history/（在 .gitignore 里，不会提交）
 prompt 读仓库根目录的 prompt.md。同一位置有 prompt.local.md 就优先用它，
 这个文件不进 git，放你自己的版本。
 
@@ -51,7 +51,7 @@ CLIP = 2000  # 每个工具输入或返回最多留多少字，太长的截断
 # 这一轮工具调用不到这么多次就不解读（纯聊天的轮次一次都没有）
 MIN_TOOL_CALLS = int(os.environ.get("EXPLAIN_CLAUDE_MIN_TOOL_CALLS", "6"))
 HISTORY_DIR = os.path.expanduser(
-    os.environ.get("EXPLAIN_CLAUDE_HISTORY_DIR", "~/.config/explain-claude/history")
+    os.environ.get("EXPLAIN_CLAUDE_HISTORY_DIR", os.path.join(ROOT, "history"))
 )
 # 这些是 Claude 给 app 更新任务列表、写收尾小结用的，闲聊时也会调，不算真干活
 BOOKKEEPING_TOOLS = ("mcp__ccd_turn__",)
