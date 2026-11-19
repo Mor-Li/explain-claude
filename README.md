@@ -1,75 +1,87 @@
 # explain-claude
 
-Claude Code 干完一轮长活，汇报往往又长又啰嗦。这个插件在每轮结束后，把这一轮的完整轨迹交给 Gemini（或任何 OpenAI 兼容接口的模型），让它用大白话重讲一遍，然后**在屏幕上原地替换** Claude 最后那段回复。
+English | [中文](README.zh-CN.md)
 
-A Claude Code plugin that hands each long turn's full trajectory to Gemini (or any OpenAI-compatible model) and replaces Claude's final reply on screen, in place, with a plain-language retelling.
+After a long turn, Claude Code's report is often long and hard to follow. This plugin hands the turn's full trajectory to Gemini (or any model behind an OpenAI-compatible API), asks it to retell what happened in plain language, and **replaces Claude's final reply on screen, in place**.
 
-## 它怎么工作
+![Left: Claude's original reply. Right: the same reply replaced in place by the Gemini retelling](docs/before-after.png)
 
-1. 一轮结束时，如果这一轮**调用工具至少 6 次**，并且 Claude **最后那段回复超过 400 字**（不算空白），就开始解读。闲聊的轮次几乎不调工具，会自动跳过。
-2. 插件读这次会话的记录文件，取出最近一轮：用户的提问、Claude 调的每个工具、工具返回、最后的回复，拼成一段文本，接在 prompt 后面发给模型。
-3. 模型回来后，屏幕上那段回复换成解读，开头标「**【Gemini 解读】**」。一般要等二三十秒。
+*Real screenshot. Left: Claude's original reply. Right: the same spot about twenty seconds later, replaced by the Gemini retelling. The default prompt is in Chinese, so the retelling is too. Write your own prompt to get another language.*
 
-只改屏幕上的显示，会话存档和 Claude 自己读到的上下文都不变。输入 `/gemini` 可以在解读和原文之间来回切换。
+## How it works
 
-## 安装
+1. When a turn ends, the plugin checks two things: Claude **called tools at least 6 times**, and Claude's **final reply is over 400 characters** (whitespace not counted). Chit-chat turns rarely call tools, so they are skipped.
+2. It reads the session's transcript file and takes the latest turn: the user's message, every tool call Claude made, what each tool returned, and Claude's final reply. That text goes after the prompt and is sent to the model.
+3. When the model answers, the reply on screen is replaced by the retelling, headed **【Gemini 解读】**. This usually takes twenty to thirty seconds.
 
-在终端里的 Claude Code 会话中：
+Only the display changes. The saved transcript and the context Claude itself reads stay as they were. Type `/gemini` to switch between the retelling and the original.
+
+Until the model answers, Claude's original reply stays on screen. If the call fails (timeout, rate limit, wrong key), you get a short "Gemini 解读失败" notice and the original stays. The conversation goes on as usual.
+
+## Install
+
+In a Claude Code session in a terminal:
 
 ```
 /plugin install explain-claude --marketplace Mor-Li/explain-claude
 ```
 
-或者在 shell 里：
+Or from a shell:
 
 ```bash
 claude plugin install explain-claude --marketplace Mor-Li/explain-claude
 ```
 
-在 Claude 桌面 app 里：点输入框旁边的 +，选 Plugins，Add marketplace 填 `Mor-Li/explain-claude`，再 Add plugin。
+In the Claude desktop app: click + next to the prompt box, choose Plugins, Add marketplace with `Mor-Li/explain-claude`, then Add plugin.
 
-安装时会问是否添加这个插件市场，回答 `y`，然后选安装范围，再填下面几项设置。
+The installer asks whether to add the marketplace. Answer `y`, pick a scope, then fill in the settings below.
 
-## 设置
+## Settings
 
-| 设置 | 默认值 | 说明 |
+| Setting | Default | What it is |
 | --- | --- | --- |
-| 接口地址 `base_url` | `https://generativelanguage.googleapis.com/v1beta/openai` | OpenAI 兼容接口的地址，不带 `/chat/completions`。默认是 Google Gemini 官方接口 |
-| 模型名 `model` | `gemini-3.1-pro-preview` | 改成你的接口上能用的模型 |
-| 密钥所在的环境变量名 `api_key_env` | `GEMINI_API_KEY` | 填变量的名字，不是密钥本身 |
-| 最少字数 `min_chars` | `400` | 最后那段回复不到这么多字就不解读 |
-| 最少工具调用次数 `min_tool_calls` | `6` | 这一轮工具调用不到这么多次就不解读 |
+| `base_url` | `https://generativelanguage.googleapis.com/v1beta/openai` | An OpenAI-compatible API base, without `/chat/completions`. The default is Google's Gemini API |
+| `model` | `gemini-3.1-pro-preview` | Any model your API serves |
+| `api_key_env` | `GEMINI_API_KEY` | The **name** of the environment variable holding your key, not the key itself |
+| `min_chars` | `400` | Skip turns whose final reply is shorter than this |
+| `min_tool_calls` | `6` | Skip turns with fewer tool calls than this |
 
-密钥只从环境变量读，不写进任何设置文件。从桌面 app 启动的会话如果读不到这个变量，插件会再让你的登录 shell 读一次，所以把 `export GEMINI_API_KEY=...` 写进 `~/.zshrc` 之类的文件就行。需要 `python3`，只用标准库。
+The key is only read from the environment and is never written to a settings file. A session started from the desktop app may not see variables from your shell profile, so the plugin starts its script through your interactive shell, which loads files such as `~/.zshrc`. Putting `export GEMINI_API_KEY=...` there is enough. Needs `python3`, standard library only.
 
-## 改 prompt
-
-发给模型的 prompt 在仓库根目录的 `prompt.md`，`{trajectory}` 会被换成这一轮的轨迹。
-
-想用自己的版本，在同一位置建一个 `prompt.local.md`，插件会优先用它。这个文件在 `.gitignore` 里，不会被提交，适合放带个人称呼、个人口吻的 prompt。
-
-调 prompt 时可以拿固定的一轮反复试，不用等真实对话：
+To change settings later from a shell:
 
 ```bash
-# 把某个会话的上一轮存成样本（--back 0 是最近一轮，1 是上一轮）
-python3 scripts/explain_turn.py ~/.claude/projects/<项目>/<会话>.jsonl --back 1 --dump samples/demo.txt
-
-# 用现在的 prompt 拿样本问一次模型，只打印结果
-python3 scripts/explain_turn.py --sample samples/demo.txt
-
-# 只看要发给模型的全文，不调用
-python3 scripts/explain_turn.py ~/.claude/projects/<项目>/<会话>.jsonl --show
+echo '{"model":"gemini-2.5-flash"}' | claude plugin configure explain-claude@explain-claude --values-stdin
 ```
 
-命令行试跑时默认读 `GEMINI_API_KEY`，接口和模型用环境变量 `EXPLAIN_CLAUDE_BASE_URL`、`EXPLAIN_CLAUDE_MODEL` 指定，密钥放在别的变量里就用 `EXPLAIN_CLAUDE_API_KEY_ENV` 指定变量名。`samples/` 也在 `.gitignore` 里。
+## Changing the prompt
 
-## 文件
+The prompt is `prompt.md` at the repository root. `{trajectory}` is replaced with the turn's trajectory.
 
-- `hooks/register.tsx`：插件主体，挂在一轮结束和画回复这两个时刻，注册 `/gemini` 命令
-- `scripts/explain_turn.py`：读会话记录、拼轨迹、调模型
-- `prompt.md`：默认 prompt
-- `types/index.d.ts`：插件保存的数据（解读结果、当前显示哪一版）的类型声明
+To use your own version, create `prompt.local.md` next to it. The plugin prefers it, and it is in `.gitignore`, so a prompt with your name or your own voice never gets committed.
 
-## 许可证
+To tune a prompt, replay one fixed turn instead of waiting for real conversations:
+
+```bash
+# Save a turn of a session as a sample (--back 0 is the latest turn, 1 the one before)
+python3 scripts/explain_turn.py ~/.claude/projects/<project>/<session>.jsonl --back 1 --dump samples/demo.txt
+
+# Ask the model once with the current prompt and print the answer
+python3 scripts/explain_turn.py --sample samples/demo.txt
+
+# Print what would be sent, without calling the model
+python3 scripts/explain_turn.py ~/.claude/projects/<project>/<session>.jsonl --show
+```
+
+From the command line the key is read from `GEMINI_API_KEY`. Set `EXPLAIN_CLAUDE_BASE_URL` and `EXPLAIN_CLAUDE_MODEL` for another API or model, and `EXPLAIN_CLAUDE_API_KEY_ENV` if your key lives in another variable. `samples/` is in `.gitignore` too.
+
+## Files
+
+- `hooks/register.tsx`: the plugin. Hooks the end of a turn and the drawing of replies, and registers `/gemini`
+- `scripts/explain_turn.py`: reads the transcript, builds the trajectory, calls the model
+- `prompt.md`: the default prompt
+- `types/index.d.ts`: type declarations for what the plugin stores (the retellings, and which version is shown)
+
+## License
 
 MIT
