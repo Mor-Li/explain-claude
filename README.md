@@ -4,9 +4,9 @@ English | [中文](README.zh-CN.md)
 
 After a long turn, Claude Code's report is often long and hard to follow. This plugin hands the turn's full trajectory to Gemini (or any model behind an OpenAI-compatible API), asks it to retell what happened in plain language, and **replaces Claude's final reply on screen, in place**.
 
-![Left: Claude's original reply. Right: the same reply replaced in place by the Gemini retelling](docs/before-after.png)
+![Left: Claude's original reply. Right: the same reply replaced in place by the Gemini retelling](docs/before-after-bilingual.png)
 
-*Real screenshot. Left: Claude's original reply. Right: the same spot about twenty seconds later, replaced by the Gemini retelling. The default prompt is in Chinese, so the retelling is too. Write your own prompt to get another language.*
+*Left: Claude's original reply. Right: the same spot about twenty seconds later, replaced by the Gemini retelling. The Chinese is from a real session, with an English translation under each sentence. The untouched screenshot is in the [Chinese README](README.zh-CN.md). The default prompt is in Chinese, so the retelling is too. Write your own prompt to get another language.*
 
 ## How it works
 
