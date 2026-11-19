@@ -18,7 +18,7 @@
       "type": "string",
       "title": "模型名",
       "description": "接口上可用的模型名",
-      "default": "gemini-3.1-pro-preview"
+      "default": "gemini-4-argon"
     },
     "api_key_env": {
       "type": "string",

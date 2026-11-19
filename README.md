@@ -4,9 +4,9 @@ English | [中文](README.zh-CN.md)
 
 After a long turn, Claude Code's report is often long and hard to follow. This plugin hands the turn's full trajectory to Gemini (or any model behind an OpenAI-compatible API), asks it to retell what happened in plain language, and **replaces Claude's final reply on screen, in place**.
 
-![Left: Claude's original reply. Right: the same reply replaced in place by the Gemini retelling](docs/before-after-bilingual.png)
+![Left: Claude's original reply. Right: the same reply replaced in place by the Gemini retelling](docs/before-after-en.png)
 
-*Left: Claude's original reply. Right: the same spot about twenty seconds later, replaced by the Gemini retelling. The Chinese is from a real session, with an English translation under each sentence. The untouched screenshot is in the [Chinese README](README.zh-CN.md). The default prompt is in Chinese, so the retelling is too. Write your own prompt to get another language.*
+*Left: Claude's original reply. Right: the same spot about twenty seconds later, replaced by the Gemini retelling. This is a real session translated into English; the original Chinese screenshot is in the [Chinese README](README.zh-CN.md). The default prompt is in Chinese, so the retelling is too. Write your own prompt to get another language.*
 
 ## How it works
 
@@ -41,7 +41,7 @@ The installer asks whether to add the marketplace. Answer `y`, pick a scope, the
 | Setting | Default | What it is |
 | --- | --- | --- |
 | `base_url` | `https://generativelanguage.googleapis.com/v1beta/openai` | An OpenAI-compatible API base, without `/chat/completions`. The default is Google's Gemini API |
-| `model` | `gemini-3.1-pro-preview` | Any model your API serves |
+| `model` | `gemini-4-argon` | Any model your API serves |
 | `api_key_env` | `GEMINI_API_KEY` | The **name** of the environment variable holding your key, not the key itself |
 | `min_chars` | `400` | Skip turns whose final reply is shorter than this |
 | `min_tool_calls` | `6` | Skip turns with fewer tool calls than this |

@@ -22,7 +22,7 @@ const num = (v: unknown, fallback: number) => {
 
 export const register: Register = (on, options) => {
   const baseUrl = str(options.base_url, 'https://generativelanguage.googleapis.com/v1beta/openai')
-  const model = str(options.model, 'gemini-3.1-pro-preview')
+  const model = str(options.model, 'gemini-4-argon')
   const keyEnv = str(options.api_key_env, 'GEMINI_API_KEY')
   const minChars = num(options.min_chars, 400)
   const minToolCalls = num(options.min_tool_calls, 6)

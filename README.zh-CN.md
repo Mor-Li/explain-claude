@@ -41,7 +41,7 @@ claude plugin install explain-claude --marketplace Mor-Li/explain-claude
 | 设置 | 默认值 | 说明 |
 | --- | --- | --- |
 | 接口地址 `base_url` | `https://generativelanguage.googleapis.com/v1beta/openai` | OpenAI 兼容接口的地址，不带 `/chat/completions`。默认是 Google Gemini 官方接口 |
-| 模型名 `model` | `gemini-3.1-pro-preview` | 改成你的接口上能用的模型 |
+| 模型名 `model` | `gemini-4-argon` | 改成你的接口上能用的模型 |
 | 密钥所在的环境变量名 `api_key_env` | `GEMINI_API_KEY` | 填变量的名字，不是密钥本身 |
 | 最少字数 `min_chars` | `400` | 最后那段回复不到这么多字就不解读 |
 | 最少工具调用次数 `min_tool_calls` | `6` | 这一轮工具调用不到这么多次就不解读 |

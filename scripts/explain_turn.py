@@ -43,7 +43,7 @@ def load_prompt():
 
 
 BASE_URL = os.environ.get("EXPLAIN_CLAUDE_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai").rstrip("/")
-MODEL = os.environ.get("EXPLAIN_CLAUDE_MODEL", "gemini-3.1-pro-preview")
+MODEL = os.environ.get("EXPLAIN_CLAUDE_MODEL", "gemini-4-argon")
 CLIP = 2000  # 每个工具输入或返回最多留多少字，太长的截断
 # 这一轮工具调用不到这么多次就不解读（纯聊天的轮次一次都没有）
 MIN_TOOL_CALLS = int(os.environ.get("EXPLAIN_CLAUDE_MIN_TOOL_CALLS", "6"))
